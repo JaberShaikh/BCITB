@@ -1,0 +1,70 @@
+version: 1
+
+dn: o=tutorialsdesk
+objectClass: organization
+objectClass: extensibleObject
+objectClass: top
+o: tutorialsdesk
+
+dn: ou=users,o=tutorialsdesk
+objectClass: extensibleObject
+objectClass: organizationalUnit
+objectClass: top
+ou: users
+
+dn: ou=groups,o=tutorialsdesk
+objectClass: extensibleObject
+objectClass: organizationalUnit
+objectClass: top
+ou: groups
+
+dn: cn=User,ou=groups,o=tutorialsdesk
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: User
+uniqueMember: cn=Normal User,ou=users,o=tutorialsdesk
+uniqueMember: cn=Api User,ou=users,o=tutorialsdesk
+uniqueMember: cn=Admin User,ou=users,o=tutorialsdesk
+
+dn: cn=Admin,ou=groups,o=tutorialsdesk
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: Admin
+uniqueMember: cn=Admin User,ou=users,o=tutorialsdesk
+
+dn: cn=Api,ou=groups,o=tutorialsdesk
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: Api
+uniqueMember: cn=Api User,ou=users,o=tutorialsdesk
+uniqueMember: cn=Admin User,ou=users,o=tutorialsdesk
+
+dn: cn=Normal User,ou=users,o=tutorialsdesk
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: Normal User
+sn: Normal
+uid: user
+userPassword: user
+
+dn: cn=Admin User,ou=users,o=tutorialsdesk
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: Admin User
+sn: Admin
+uid: admin
+userPassword: admin
+
+dn: cn=Api User,ou=users,o=tutorialsdesk
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: Api User
+sn: Api
+uid: api
+userPassword: api
