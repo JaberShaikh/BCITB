@@ -29,21 +29,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
  @Qualifier("ldaploginService")
  LdapAuthoritiesPopulator ldapAuthoritiesPopulator;
  
-// @Autowired
-// public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-// auth.ldapAuthentication()
-// .contextSource()
-// .ldif("/WEB-INF/conf/users.ldif").root("o=tutorialsdesk")
-// .and()
-// .userSearchFilter("(uid={0})")
-// .userSearchBase("ou=users")
-// .ldapAuthoritiesPopulator(ldapAuthoritiesPopulator);
-// } 
- 
  @Autowired
  public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
  auth.ldapAuthentication()
  .contextSource()
+// THE BELOW URLs ARE NOT USED ANYMORE
 //.url("ldaps://uk-chs-ledc03.qmcr.qmul.ac.uk:636")
 //.managerDn("cn=srv-ldapedc01, ou=Service Accounts, dc=qmcr, dc=qmul, dc=ac, dc=uk") 
  .url("ldap://uk-chs-ldc01.qmcr.qmul.ac.uk:389")
@@ -69,7 +59,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	 .authorizeRequests()
 	 .antMatchers("/").permitAll()
 	 .antMatchers("/select_department_locations").access(roleAllowed)
-//	 .antMatchers("/home").access(roleAllowed)
 	 .and()
 	 .formLogin()
 	 .loginProcessingUrl("/login")

@@ -42,7 +42,7 @@ public class DataSourceConfig {
  @Bean
  public SessionFactory sessionFactory() {
 	 LocalSessionFactoryBuilder builder = new LocalSessionFactoryBuilder(dataSource());
-	 builder.scanPackages("com.tissuebank.model","com.tissuebank.model.bgtb").addProperties(getHibernateProperties());
+	 builder.scanPackages("com.tissuebank.model","com.tissuebank.model.global.tables").addProperties(getHibernateProperties());
  	return builder.buildSessionFactory();
  }
  

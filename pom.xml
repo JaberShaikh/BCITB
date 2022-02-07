@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>BCITBConsents</groupId>
   <artifactId>BCITBConsents</artifactId>
-  <version>1.25.b.127</version>
+  <version>1.28.b.127</version>
   <packaging>war</packaging>
   <name>BCITBConsents</name>
   <properties>

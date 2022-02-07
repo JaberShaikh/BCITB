@@ -1284,6 +1284,14 @@ function processPatientConsentInfectionRisk(whatToProcess, whichInputBox, giveCo
                 			document.search_form.submit();
                     		break;
                     	case 'CHECK-PATIENT-STATUS-IMPORTED-CONSENT-AND-SUBMIT': case 'CHECK-PATIENT-STATUS-AUDIT-CONSENT-AND-SUBMIT':
+                        	switch (whatToProcess) {
+                        	case 'CHECK-PATIENT-STATUS-IMPORTED-CONSENT-AND-SUBMIT':
+                        		if(data.locked_description) {
+                        			alert('Consent is locked \n\n' + data.locked_description);
+                        			processWaitingButtonSpinner('END-VIEW-IMPORT-CONSENT');
+                        			return false;
+                        		}
+                        	}
                 			document.getElementById('selected_data_id').value = $(whichInputBox).val();
                 			document.getElementById('selected_department').value = $(whichInputBox).attr('id').split('_')[0];
                         	switch (whatToProcess) {

@@ -21,7 +21,9 @@ public class UserDaoImpl implements UserDao {
  @Override
  public User findUserByUsername(String username) 
  {
-	 return (User) sessionFactory.getCurrentSession().createQuery("FROM User u where upper(u.username) = '" + username.toUpperCase() + "'").uniqueResult(); 
+	 return (User) sessionFactory.getCurrentSession().createQuery(
+			 "FROM User u where upper(u.username) = '" + username.toUpperCase() + "' " +
+			 "AND u.active_user IS NOT NULL AND upper(u.active_user) = 'YES'").uniqueResult(); 
  }
 
  @SuppressWarnings("unchecked")

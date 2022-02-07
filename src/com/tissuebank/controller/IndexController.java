@@ -180,34 +180,41 @@ public class IndexController
 			@ModelAttribute("existing_audit_consents") List<Consent> existing_audit_consents) 
 					throws IOException, AddressException, ParseException, MessagingException
 	{
-
-		various_actions = unlockUserActionIfAny(various_actions,columnName,columnValue);
-		session_patient.setPatient_which_department(user_selected_department.getDept_acronym());
-		session_patient = unlockPatient(session_patient, user, user_selected_department);
-		
-		user_selected_department = new Department();
-		user_selected_locations.clear();
-		
 		user = userService.findUserByUsername(getPrincipal());
-		primaryRole = getPrimaryRole(userService.findUserByUsername(getPrincipal()));
-
-		model.addAttribute("whichPageToShow", "select_department_locations"); 
-		model.addAttribute("menuToShow", "ACTION");
-		model.addAttribute("user", user);
-		model.addAttribute("primaryRole", primaryRole);
-		model.addAttribute("user_selected_department", user_selected_department);
-		model.addAttribute("departments", departmentService.getAllDepartments());
-		model.addAttribute("deptlocs", departmentLocationService.getDepartmentAllLocations(user.getUserDepartments()));
-		model.addAttribute("various_actions", various_actions);
-		if(primaryRole.getUserRoleAccess(BCITBVariousVariables.audit).toLowerCase().contains(BCITBVariousVariables.edit)) 
-			model.addAttribute("existing_audit_consents", existing_audit_consents);
-
-//		importConsentData(BCITBVariousVariables.HOTB, "H:\\Project\\Heam-Onc\\Scanned");
-//		searchConsentFilesExists(BCITBVariousVariables.HOTB, "H:\\Project\\Heam-Onc\\Scanned");
-		processConsents(BCITBVariousVariables.MONTHLY_REPORT_SENT_DATE, "");
-		processConsents("AUDIT-REPORT", "");
 		
-		return "index";
+		if(user == null) {
+			return "accessDenied";
+		} else {
+
+			various_actions = unlockUserActionIfAny(various_actions,columnName,columnValue);
+			session_patient.setPatient_which_department(user_selected_department.getDept_acronym());
+			session_patient = unlockPatient(session_patient, user, user_selected_department);
+			
+			user_selected_department = new Department();
+			user_selected_locations.clear();
+			
+			primaryRole = getPrimaryRole(userService.findUserByUsername(getPrincipal()));
+	
+			model.addAttribute("whichPageToShow", "select_department_locations"); 
+			model.addAttribute("menuToShow", "ACTION");
+			model.addAttribute("user", user);
+			model.addAttribute("primaryRole", primaryRole);
+			model.addAttribute("user_selected_department", user_selected_department);
+			model.addAttribute("departments", departmentService.getAllDepartments());
+			model.addAttribute("deptlocs", departmentLocationService.getDepartmentAllLocations(user.getUserDepartments()));
+			model.addAttribute("various_actions", various_actions);
+			if(primaryRole.getUserRoleAccess(BCITBVariousVariables.audit).toLowerCase().contains(BCITBVariousVariables.edit)) 
+				model.addAttribute("existing_audit_consents", existing_audit_consents);
+	
+	//		importConsentData(BCITBVariousVariables.HOTB, "H:\\Project\\Heam-Onc\\Scanned");
+	//		searchConsentFilesExists(BCITBVariousVariables.HOTB, "H:\\Project\\Heam-Onc\\Scanned");
+			processConsents(BCITBVariousVariables.MONTHLY_REPORT_SENT_DATE, "");
+			processConsents("AUDIT-REPORT", "");
+
+			return "index";
+			
+		}
+		
 	}
 	
 	@RequestMapping(value = {"/welcome"}, method={RequestMethod.POST,RequestMethod.GET})
@@ -1344,7 +1351,7 @@ public class IndexController
 							DateTimeFormatter.ofPattern("d-M-yyyy HH:mm:ss").format(LocalDateTime.now()) + " by " + user.getUsername() + 
 							" [" + primaryRole.getRole_description() + "]",BCITBVariousVariables.no, session_consents.get(0).getCn_patient_id());
 				
-				imported_consents.removeIf(b -> b.getConsent_id() == my_con_id);
+//				imported_consents.removeIf(b -> b.getConsent_id() == my_con_id);
 				
 			} else if(request.getServletPath().equalsIgnoreCase("/finalise_audit_consent")) {
 				
@@ -2661,9 +2668,8 @@ public class IndexController
 			@ModelAttribute("user_selected_locations") List<Location> user_selected_locations) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, ParseException, IllegalStateException, IOException 
 	 {  
 		List<Action> consent_actions = null;
-		Action this_action = null;
 		String dataToReturn = "", sql_script = "", sel_columns = "";
-		Consent this_consent;
+		Action this_action = null; Consent this_consent; Patient this_patient;
 		
 		if(whichDepartment.trim().isEmpty())
 			whichDepartment = user_selected_department.getDept_acronym();
@@ -2882,9 +2888,26 @@ public class IndexController
 				dataToReturn = JSONObject.fromObject(patientService.getPatientFromID(whichDepartment,Integer.parseInt(valueOfInputbox[0]))).toString();
 				break;
 			case "CHECK-PATIENT-STATUS-IMPORTED-CONSENT-AND-SUBMIT": case "CHECK-PATIENT-STATUS-AUDIT-CONSENT-AND-SUBMIT": 
+				this_patient = null;
 				this_consent = consentService.getPatientConsent(whichDepartment, Integer.parseInt(valueOfInputbox[0]), "", "", null);
-				if(this_consent != null)
-					dataToReturn = JSONObject.fromObject(patientService.getPatientFromID(whichDepartment,this_consent.getCn_patient_id())).toString();
+				if(this_consent != null) {
+					this_patient = patientService.getPatientFromID(whichDepartment,this_consent.getCn_patient_id());
+				}
+				if(this_patient != null) {
+					switch (whatToProcess) {
+					case "CHECK-PATIENT-STATUS-IMPORTED-CONSENT-AND-SUBMIT":
+						if(this_patient.getLocked_description() == null) {
+							if(actionService.getActionsFromDataId(whichDepartment,this_consent.getConsent_id(), 
+									BCITBVariousVariables.consent, "", BCITBVariousVariables.active, BCITBVariousVariables.ascending).size() > 0) {
+								this_patient.setLocked_description("This consent has some pending ACTIVE action(s)");
+							}
+						}
+						break;
+					}
+					dataToReturn = JSONObject.fromObject(this_patient).toString();
+				} else {
+					dataToReturn = JSONObject.fromObject(null).toString();
+				}
 				break;
 			}
 			break;
@@ -2964,20 +2987,20 @@ public class IndexController
 
 		case "GET-IMPORT-CONSENTS-FROM-SESSION":
 			
-			if(imported_consents.size() <= 0) {
-				for(UserDepartment user_dept:user.getUserDepartments())
-					for(Consent con: consentService.getPatientConsents(BCITBVariousVariables.is_imported, 
-							user_dept.getDepartment().getDept_acronym(), 0, "", "", null, BCITBVariousVariables.ascending)) {
-						if(actionService.getActionsFromDataId(user_dept.getDepartment().getDept_acronym(), con.getConsent_id(), 
-								BCITBVariousVariables.consent, "", BCITBVariousVariables.active, BCITBVariousVariables.ascending).size() <= 0) {
-							con.setConsent_which_department(user_dept.getDepartment().getDept_acronym());
-							if(con.getSam_coll_before_sep_2006() != null && con.getSam_coll_before_sep_2006().equalsIgnoreCase(BCITBVariousVariables.yes))
-								con.setDescription("(" + con.getConsent_which_department() + ") Validate imported consent (sample collected before Sep 2006)");
-							else
-								con.setDescription("(" + con.getConsent_which_department() + ") Validate imported consent dated " + con.getDate_of_consent());
-							imported_consents.add(con);
-						}
-					}
+			imported_consents.clear();
+			for(UserDepartment user_dept:user.getUserDepartments()) {
+				for(Consent con: consentService.getPatientConsents(BCITBVariousVariables.is_imported, 
+						user_dept.getDepartment().getDept_acronym(), 0, "", "", null, BCITBVariousVariables.ascending)) {
+//					if(actionService.getActionsFromDataId(user_dept.getDepartment().getDept_acronym(), con.getConsent_id(), 
+//							BCITBVariousVariables.consent, "", BCITBVariousVariables.active, BCITBVariousVariables.ascending).size() <= 0) {
+						con.setConsent_which_department(user_dept.getDepartment().getDept_acronym());
+						if(con.getSam_coll_before_sep_2006() != null && con.getSam_coll_before_sep_2006().equalsIgnoreCase(BCITBVariousVariables.yes))
+							con.setDescription("(" + con.getConsent_which_department() + ") Validate imported consent (sample collected before Sep 2006)");
+						else
+							con.setDescription("(" + con.getConsent_which_department() + ") Validate imported consent dated " + con.getDate_of_consent());
+						imported_consents.add(con);
+//					}
+				}
 			}
 			
 			dataToReturn = JSONArray.fromObject(imported_consents).toString();

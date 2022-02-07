@@ -39,6 +39,9 @@ public class User {
   @Column(name = "EMAIL")
   private String email;
 
+  @Column(name = "ACTIVE_USER")
+  private String active_user;
+  
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
   private List<UserRole> userRoles = new ArrayList<UserRole>();
   
@@ -51,6 +54,14 @@ public class User {
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
   private Set<AuditTeam> userAuditTeams = new HashSet<AuditTeam>();
   
+public String getActive_user() {
+	return active_user;
+}
+
+public void setActive_user(String active_user) {
+	this.active_user = active_user;
+}
+
 public Set<AuditTeam> getUserAuditTeams() {
 	return userAuditTeams;
 }

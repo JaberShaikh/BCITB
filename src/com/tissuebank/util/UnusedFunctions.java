@@ -2,6 +2,18 @@ package com.tissuebank.util;
 
 public class UnusedFunctions {
 
+//SecurityConfig.java
+// @Autowired
+// public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+// auth.ldapAuthentication()
+// .contextSource()
+// .ldif("/WEB-INF/conf/users.ldif").root("o=tutorialsdesk")
+// .and()
+// .userSearchFilter("(uid={0})")
+// .userSearchBase("ou=users")
+// .ldapAuthoritiesPopulator(ldapAuthoritiesPopulator);
+// } 
+
 //	public class MonthlyReportToOM implements Job {
 //
 //		@Override
